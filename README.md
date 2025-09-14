@@ -15,8 +15,11 @@ The backend was developed in **NestJS + ORM Prisma + PostgreSQL** and the fronte
 ## 🏗 Project Structure
 
 travelling/
+
 ├── backend/ # API
+
 ├── frontend/ # Interface
+
 └── docs/ # Prints
 
 ---
