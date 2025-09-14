@@ -1,0 +1,264 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  AGENCY
+  TOURIST
+  BUSINESS
+}
+
+enum ContractStatus {
+  PENDING
+  CONFIRMED
+  CANCELED
+  FINISHED
+}
+
+enum LocalType {
+  establishment
+  attraction
+}
+
+// models/Category.model.prisma
+model Category {
+  id    String @id @default(uuid())
+  title String @unique
+
+  tourists      Tourist[]
+  establishment Establishment[]
+  attraction    Attraction[]
+
+  createdAt DateTime @default(now()) @db.Timestamp
+  updatedAt DateTime @default(now()) @db.Timestamp
+
+  @@map("categories")
+}
+
+// models/User.model.prisma
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  phone        String   @unique
+  passwordHash String
+  userRole     UserRole
+
+  tourist  Tourist?
+  agency   Agency?
+  business Business?
+
+  createdAt DateTime @default(now()) @db.Timestamp
+  updatedAt DateTime @default(now()) @db.Timestamp
+
+  @@map("users")
+}
+
+// models/Tourist.model.prisma
+model Tourist {
+  id       String @id @default("user")
+  lastname String
+  age      Int
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+
+  favoriteCategories Category[]
+  travelling         Travelling[]
+
+  contracts            Contract[]              @relation("contracts")
+  ratingsAttraction    RatingToAttraction[]    @relation("ratingsAttraction")
+  ratingsEstablishment RatingToEstablishment[] @relation("ratingsEstablishment")
+
+  @@map("tourists")
+}
+
+// models/Agency.model.prisma
+model Agency {
+  id     String @id @default("user")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String @unique
+
+  contracts Contract[] @relation("contracts")
+
+  attractions Attraction[]
+
+  @@map("agencies")
+}
+
+// models/Business.model.prisma
+model Business {
+  id             String          @id @default("user")
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId         String          @unique
+  establishments Establishment[]
+
+  @@map("businesses")
+}
+
+// models/Establishment.model.prisma
+model Establishment {
+  id         String   @id @default(uuid())
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  businessId String
+
+  type LocalType @default(establishment)
+
+  name                 String
+  description          String
+  banner               String
+  openHours            DateTime   @db.Timestamp
+  closeHours           DateTime   @db.Timestamp
+  location             String     @unique
+  minPrice             Float
+  maxPrice             Float
+  openDays             String[]
+  foundInEstablishment String
+  otherInformation     String
+  phone                String?    @unique
+  categories           Category[]
+  generalMedias        String[]
+  menuOfServicesMedia  String[]
+
+  locals  LocalReference[]        @relation("localsEstablishment")
+  ratings RatingToEstablishment[] @relation("ratings")
+
+  averageRating Float @default(5)
+
+  createdAt DateTime @default(now()) @db.Timestamp
+  updatedAt DateTime @default(now()) @db.Timestamp
+
+  @@map("establishment")
+}
+
+// models/Attraction.model.prisma
+model Attraction {
+  id       String @id @default(uuid())
+  agency   Agency @relation(fields: [agencyId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  agencyId String
+
+  type LocalType @default(attraction)
+
+  name        String
+  pricing     Float
+  location    String   @unique
+  date        DateTime @db.Timestamp
+  description String
+
+  foundInAttraction    String
+  notFoundInAttraction String
+  whatToTake           String[]
+  categories           Category[]
+  banner               String
+  generalMedias        String[]
+
+  contracts Contract[]       @relation("contracts")
+  locals    LocalReference[] @relation("localsAttraction")
+
+  ratings       RatingToAttraction[] @relation("ratings")
+  averageRating Float                @default(5)
+
+  createdAt DateTime @default(now()) @db.Timestamp
+  updatedAt DateTime @default(now()) @db.Timestamp
+
+  @@map("attraction")
+}
+
+// models/Travelling.model.prisma
+model Travelling {
+  id        String  @id @default(uuid())
+  tourist   Tourist @relation(fields: [touristId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  touristId String
+
+  title String
+
+  locals LocalReference[] @relation("localsTravelling")
+
+  createdAt DateTime @default(now()) @db.Timestamp
+  updatedAt DateTime @default(now()) @db.Timestamp
+
+  @@map("travelling")
+}
+
+// models/Reference.model.prisma
+model LocalReference {
+  id       String     @id @default(uuid())
+  position Int
+  type     LocalType?
+
+  attraction   Attraction? @relation(fields: [attractionId], references: [id], name: "localsAttraction", onDelete: Cascade, onUpdate: Cascade)
+  attractionId String?
+
+  establishment   Establishment? @relation(fields: [establishmentId], references: [id], name: "localsEstablishment", onDelete: Cascade, onUpdate: Cascade)
+  establishmentId String?
+
+  travelling   Travelling? @relation(fields: [travellingId], references: [id], name: "localsTravelling", onDelete: Cascade, onUpdate: Cascade)
+  travellingId String?
+
+  @@map("local")
+}
+
+// models/RatingToAttraction.model.prisma
+model RatingToAttraction {
+  id        String   @id @default(uuid())
+  tourist   Tourist? @relation(fields: [touristId], references: [id], name: "ratingsAttraction", onUpdate: Cascade)
+  touristId String?
+
+  attraction   Attraction @relation(fields: [attractionId], references: [id], name: "ratings", onDelete: Cascade, onUpdate: Cascade)
+  attractionId String
+
+  value Float @default(5)
+
+  createdAt DateTime @default(now()) @db.Timestamp
+  updatedAt DateTime @default(now()) @db.Timestamp
+
+  @@map("ratingToAttraction")
+}
+
+// models/RatingToEstablishment.model.prisma
+model RatingToEstablishment {
+  id        String   @id @default(uuid())
+  tourist   Tourist? @relation(fields: [touristId], references: [id], name: "ratingsEstablishment", onUpdate: Cascade)
+  touristId String?
+
+  establishment   Establishment @relation(fields: [establishmentId], references: [id], name: "ratings", onDelete: Cascade, onUpdate: Cascade)
+  establishmentId String
+
+  value Float @default(5)
+
+  createdAt DateTime @default(now()) @db.Timestamp()
+  updatedAt DateTime @default(now()) @db.Timestamp()
+
+  @@map("ratingToEstablishment")
+}
+
+// models/Contract.model.prisma
+model Contract {
+  id String @id @default(uuid())
+
+  tourist   Tourist @relation(fields: [touristId], references: [id], name: "contracts", onDelete: Cascade, onUpdate: Cascade)
+  touristId String
+
+  agency   Agency @relation(fields: [agencyId], references: [id], name: "contracts", onDelete: Cascade, onUpdate: Cascade)
+  agencyId String
+
+  attraction   Attraction @relation(fields: [attractionId], references: [id], name: "contracts", onDelete: Cascade, onUpdate: Cascade)
+  attractionId String
+
+  status  ContractStatus @default(PENDING)
+  deleted Boolean        @default(false)
+
+  createdAt DateTime @default(now()) @db.Timestamp()
+  updatedAt DateTime @default(now()) @db.Timestamp()
+
+  @@map("contract")
+}

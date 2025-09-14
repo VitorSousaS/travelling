@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: "Poppins", sans-serif;
+  }
+}
+
+@media (max-width: 640px) {
+  .ant-picker-panels {
+    flex-direction: column;
+  }
+}
+
+.ant-btn-primary {
+  background-color: #6b7d5c;
+}
+
+.ant-modal-close {
+  color: #ffde59 !important;
+  margin-top: 0.5rem;
+}
+
+.ant-picker-input > input {
+  font-size: 1rem !important;
+  color: #043419 !important;
+}
+
+.ant-picker-input > input::placeholder {
+  color: #9ca3af !important;
+}
+
+.ant-btn-sm {
+  background: #6b7d5c !important;
+  color: #f6efdc !important;
+}
