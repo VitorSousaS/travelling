@@ -54,10 +54,11 @@ Access an API at: http://localhost:3333
 Swagger Documentation: http://localhost:3333/docs
 
 ### 3️⃣ Frontend
+```bash
 cd ../frontend
 npm install
 npm run dev
-
+```
 Access the front at: http://localhost:3000
 
 <p align="center"> <img src="docs/screenshot1.png" width="250" /> <img src="docs/screenshot2.png" width="250" /> <img src="docs/screenshot3.png" width="250" /> </p>
