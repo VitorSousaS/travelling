@@ -26,12 +26,12 @@ travelling/
 
 ## 🚀 How to Run the Project
 
-### 1️⃣ Clonar o Repositório
+### 1️⃣ Clone the Repository
 ```bash
 git clone git@github.com:VitorSousaS/travelling.git
 cd travelling
 ```
-### 2️⃣ Backend (NestJS)
+### 2️⃣ Backend
 
 ```bash
 cd backend
